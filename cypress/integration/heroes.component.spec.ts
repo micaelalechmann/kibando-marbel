@@ -1,32 +1,71 @@
+
 describe('Heroes', () => {
-  // This one works, but may be flaky
-  it('Should delete Heroes', () => {
-    // Get the requests to wait
+
+  beforeEach(() => {
     cy.server();
     cy.route('GET', 'http://localhost:4200/api/heroes').as('heroes');
     cy.route('DELETE', 'http://localhost:4200/api/heroes/*').as('deleteHeroes');
+    cy.route('POST', 'http://localhost:4200/api/heroes').as('addHero');
 
-    // Enter the page
+    cy.visit('http://localhost:4200/heroes');
+    cy.wait('@heroes');
+  })
+
+  it('Should not add hero from a blank input', () => {
+    cy.get('ul')
+      .get('li').then($li => {
+        const initialLength = $li.length;
+        cy.get('#addBtn').click();
+        cy.get('li').its('length').should('be.eq', initialLength);
+      })
+  })
+
+  it('Should add Heroes', () => {
+    cy.get('input')
+      .type('Blue Widow');
+    cy.get('#addBtn').click();
+    cy.wait('@addHero');
+    cy.wait('@heroes');
+
     cy.visit('http://localhost:4200/heroes');
     cy.wait('@heroes');
 
-    // Get heroes list and change scope
+    cy.get('li').eq(-1).contains('Blue Widow');
+  });
+
+  it('Should delete Heroes', () => {
+    cy.request('POST', 'http://localhost:4200/api/heroes', {
+      "name": "Betman",
+      "category": "Rich"
+    });
+
+    cy.visit('http://localhost:4200/heroes');
+    cy.wait('@heroes');
+
     cy.get('.heroes').within(($ul) => {
       cy.get('li').then($li => {
 
-        // Gather initial data to compare
         const itemsLength = $li.length;
 
-        // Delete the first hero on the list
-        cy.get('button').eq(0).click();
+        cy.get('button').eq(itemsLength - 1).click();
         cy.wait('@deleteHeroes');
 
         cy.visit('http://localhost:4200/heroes');
         cy.wait('@heroes');
 
-        // After reloading check if it really was deleted.
         cy.get('li').its('length').should('be.lt', itemsLength);
       });
     });
   });
+
+  it('Should visit hero page when hero is clicked', () => {
+    const getFirstHero = () => cy.get('li')
+      .eq(0);
+
+    getFirstHero().get('#heroName').invoke('text').then(text => {
+      getFirstHero().click();
+      cy.get('h2').first().contains(text.toUpperCase());
+    });
+
+  })
 });

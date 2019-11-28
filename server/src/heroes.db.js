@@ -4,7 +4,7 @@ var pool = new Pool({
     connectionString: conString
 });
 
-function getHeroes(name = false) {
+function getHeroes(name = '') {
     return new Promise((resolve, reject) => {
         pool.connect(function (err, client, done) {
 
@@ -66,7 +66,7 @@ function updateHero(hero) {
                 reject(new Error('Hero must exist'));
             }
 
-            client.query('UPDATE hero SET name = $1, category = $2 where id = $3', [hero.category, hero.name + 't', hero.id], function (err, result) {
+            client.query('UPDATE hero SET name = $1, category = $2 where id = $3', [hero.name, hero.category, hero.id], function (err, result) {
                 done();
                 if (err) {
                     return reject(err);
@@ -86,7 +86,7 @@ function saveHero(hero) {
                 reject(err)
             }
 
-            client.query('INSERT INTO (name, category) VALUES ($1, $2)', [hero.name, hero.category], function (err, result) {
+            client.query('INSERT INTO hero (name, category) VALUES ($1, $2)', [hero.name, hero.category], function (err, result) {
                 done();
                 if (err) {
                     return reject(err);

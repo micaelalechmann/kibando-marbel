@@ -4,9 +4,9 @@ import { Location } from '@angular/common';
 import { HeroService }  from '../hero.service';
 
 export class Hero {
-  id: number;
   category: string;
   name: string;
+  id?: number;
 }
 
 
@@ -30,7 +30,7 @@ export class HeroDetailComponent implements OnInit {
 
   getHero(): void {
     const id = +this.route.snapshot.paramMap.get('id');
-    this.heroService.getHero(id + 1)
+    this.heroService.getHero(id)
       .subscribe(hero => this.hero = hero);
   }
 

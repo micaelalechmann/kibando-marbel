@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { HeroService } from '../hero.service';
 
 export class Hero {
-  id: number;
   category: string;
   name: string;
+  id?: number;
 }
 
 @Component({
@@ -29,7 +29,9 @@ export class HeroesComponent implements OnInit {
   add(name: string): void {
     name = name.trim();
     if (!name) { return; }
-    this.heroes.push({ name, id: this.heroes[this.heroes.length - 1].id++ } as Hero);
+    this.heroService.addHero({ name, category: 'hero'}).subscribe(() => {
+      this.getHeroes();
+    });
 
   }
 
